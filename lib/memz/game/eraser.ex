@@ -32,4 +32,7 @@ defmodule Memz.Game.Eraser do
     |> Enum.shuffle
     |> Enum.chunk_every(chunk_size)
   end
+  
+  def done?(%{steps: []}), do: true
+  def done?(_eraser), do: false
 end
