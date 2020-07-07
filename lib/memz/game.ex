@@ -21,8 +21,8 @@ defmodule Memz.Game do
     |> Map.put(:action, :validate)
   end
   
-  def erase(eraser) do
-    Eraser.erase(eraser)
+  def erase(eraser, guess \\ "") do
+    Eraser.erase(eraser, guess)
   end
   
   def done?(eraser) do
