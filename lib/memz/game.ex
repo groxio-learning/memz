@@ -21,11 +21,20 @@ defmodule Memz.Game do
     |> Map.put(:action, :validate)
   end
   
-  def erase(eraser, guess \\ "") do
-    Eraser.erase(eraser, guess)
+  def guess_changeset() do
+    {%{}, %{text: :string}}
+    |> Changeset.cast(%{}, [:text])
+  end
+  
+  def erase(eraser) do
+    Eraser.erase(eraser)
+  end
+  
+  def score(eraser, guess) do
+    Eraser.score(eraser, guess)
   end
   
   def done?(eraser) do
-    Eraser.done?(eraser)
+    eraser.status == :finished
   end
 end
