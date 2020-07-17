@@ -1,9 +1,14 @@
 defmodule MemzWeb.GameLive.Play do
   use MemzWeb, :live_view
-  alias Memz.Game
+  alias Memz.{Game, BestScores}
+  alias Memz.BestScores.Score
   
   @default_text ""
   @default_steps 0
+  
+  def mount(_params, _session, %{assigns: %{live_action: :over}}=socket) do
+    {:ok, push_redirect(socket, to: "/game/welcome")}
+  end
   
   def mount(_params, _session, socket) do
     {
@@ -18,6 +23,29 @@ defmodule MemzWeb.GameLive.Play do
     }
   end
     
+  def render(%{live_action: :over}=assigns) do
+    ~L"""
+    <h1>Game over!</h1>
+    <h2>Your score: <%= @eraser.score %></h2>
+    <h2>Enter your initials!</h2>
+    <%= f = form_for @score_changeset, "#",
+      phx_change: "validate_score",
+      phx_submit: "save_score" %>
+
+      <%= label f, :score %>
+      <%= number_input f, :score, disabled: true %>
+      <%= error_tag f, :score %>
+
+      <%= label f, :initials %>
+      <%= text_input f, :initials %>
+      <%= error_tag f, :initials %>
+
+      <%= submit "Submit Score", disabled: !@score_changeset.valid? %>
+    </form>    
+    <button phx-click="play">Play again?</button>
+    """
+  end
+  
   def render(%{eraser: nil}=assigns) do
     ~L"""
     <h1>What do you want to memorize?</h1>
@@ -114,6 +142,30 @@ defmodule MemzWeb.GameLive.Play do
     assign(socket, eraser: Game.score(socket.assigns.eraser, guess))
   end
   
+  defp save_score(socket, params) do
+    BestScores.create_score(params["initials"], socket.assigns.eraser.score)
+    push_redirect(socket, to: "/game/welcome")
+  end
+  
+  defp validate_score(socket, params) do
+    changeset = 
+      %Score{score: socket.assigns.eraser.score}
+      |> BestScores.change_score(params)
+      |> Map.put(:action, :validate)
+      
+    assign(
+      socket, 
+      score_changeset: changeset
+    )
+  end
+  
+  defp maybe_finish(%{assigns: %{eraser: %{status: :finished, score: score}}}=socket) do
+    socket
+    |> assign(score_changeset: BestScores.change_score(%Score{score: score}, %{}))
+    |> push_patch(to: "/game/over")
+  end
+  defp maybe_finish(socket), do: socket
+  
   def handle_event("validate", %{"game" => params}, socket) do
     {:noreply, validate(socket, params)}
   end
@@ -127,6 +179,18 @@ defmodule MemzWeb.GameLive.Play do
   end
   
   def handle_event("guess", %{"guess" => %{"text" => guess}}, socket) do
-    {:noreply, score(socket, guess)}
+    {:noreply, socket |> score(guess) |> maybe_finish}
+  end
+  
+  def handle_event("validate_score", %{"score" => params}, socket) do
+    {:noreply, validate_score(socket, params)}
+  end
+
+  def handle_event("save_score", %{"score" => params}, socket) do
+    {:noreply, save_score(socket, params)}
+  end
+  
+  def handle_params(_params, _, socket) do
+    {:noreply, socket}
   end
 end
