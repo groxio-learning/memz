@@ -1,0 +1,35 @@
+<h1>Listing Readings</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, MemzWeb.ReadingLive.FormComponent,
+    id: @reading.id || :new,
+    title: @page_title,
+    action: @live_action,
+    reading: @reading,
+    return_to: Routes.reading_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Steps</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="readings">
+    <%= for reading <- @readings do %>
+      <tr id="reading-<%= reading.id %>">
+        <td><%= live_patch reading.name, to: Routes.reading_index_path(@socket, :edit, reading) %></td>
+        <td><%= reading.steps %></td>
+
+        <td>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: reading.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Reading", to: Routes.reading_index_path(@socket, :new) %></span>

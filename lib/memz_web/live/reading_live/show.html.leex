@@ -1,0 +1,32 @@
+<h1>Show Reading</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, MemzWeb.ReadingLive.FormComponent,
+    id: @reading.id,
+    title: @page_title,
+    action: @live_action,
+    reading: @reading,
+    return_to: Routes.reading_show_path(@socket, :show, @reading) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @reading.name %>
+  </li>
+
+  <li>
+    <strong>Passage:</strong>
+    <%= @reading.passage %>
+  </li>
+
+  <li>
+    <strong>Steps:</strong>
+    <%= @reading.steps %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.reading_show_path(@socket, :edit, @reading), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.reading_index_path(@socket, :index) %></span>

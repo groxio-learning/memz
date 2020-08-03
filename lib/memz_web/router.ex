@@ -21,6 +21,13 @@ defmodule MemzWeb.Router do
     live "/game/play", GameLive.Play, :play
     live "/game/over", GameLive.Play, :over
     live "/game/welcome", GameLive.Welcome, :welcome
+    
+    live "/readings", ReadingLive.Index, :index
+    live "/readings/new", ReadingLive.Index, :new
+    live "/readings/:id/edit", ReadingLive.Index, :edit
+
+    live "/readings/:id", ReadingLive.Show, :show
+    live "/readings/:id/show/edit", ReadingLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
