@@ -1,11 +1,13 @@
 defmodule Memz.BestScores.Score do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Memz.Passages.Reading
 
   schema "scores" do
     field :initials, :string
     field :score, :integer
-
+    
+    belongs_to :reading, Reading
     timestamps()
   end
 

@@ -18,7 +18,7 @@ defmodule MemzWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
-    live "/game/play", GameLive.Play, :play
+    live "/game/play/:passage_name", GameLive.Play, :play
     live "/game/over", GameLive.Play, :over
     live "/game/welcome", GameLive.Welcome, :welcome
     

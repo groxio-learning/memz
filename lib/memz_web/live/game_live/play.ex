@@ -1,6 +1,6 @@
 defmodule MemzWeb.GameLive.Play do
   use MemzWeb, :live_view
-  alias Memz.{Game, BestScores}
+  alias Memz.{Game, BestScores, Passages}
   alias Memz.BestScores.Score
   
   @default_text ""
@@ -10,16 +10,16 @@ defmodule MemzWeb.GameLive.Play do
     {:ok, push_redirect(socket, to: "/game/welcome")}
   end
   
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     {
       :ok, 
       assign(
         socket, 
-        eraser: nil,
         guess_changeset: Game.guess_changeset(),
         changeset: Game.change_game(default_game(), %{}), 
         submitted: false
       )
+      |> new_eraser(params["passage_name"])
     }
   end
     
@@ -91,7 +91,7 @@ defmodule MemzWeb.GameLive.Play do
       phx_submit: "guess", as: "guess" %>
 
       <%= label f, :text %>
-      <%= text_input f, :text %>
+      <%= textarea f, :text %>
       <%= error_tag f, :text %>
 
       <%= submit "Type the text" %>
@@ -118,6 +118,17 @@ defmodule MemzWeb.GameLive.Play do
   
   defp default_game(), do: Game.new_game(@default_text, @default_steps)
   
+  defp new_eraser(socket, passage_name) do
+    reading = Passages.lookup_reading(passage_name)
+    eraser = Game.new_eraser(reading.passage, reading.steps)
+    
+    assign(
+      socket, 
+      eraser: eraser, 
+      reading: reading
+    )
+  end
+  
   defp validate(socket, params) do
     assign(
       socket, 
@@ -143,7 +154,7 @@ defmodule MemzWeb.GameLive.Play do
   end
   
   defp save_score(socket, params) do
-    BestScores.create_score(params["initials"], socket.assigns.eraser.score)
+    BestScores.create_score(socket.assigns.reading, params["initials"], socket.assigns.eraser.score)
     push_redirect(socket, to: "/game/welcome")
   end
   

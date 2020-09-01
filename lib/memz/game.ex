@@ -8,6 +8,10 @@ defmodule Memz.Game do
     __struct__(text: text, steps: steps)
   end
   
+  def new_eraser(text, steps) do
+    Eraser.new(text, steps)
+  end
+  
   def create(%{valid?: true}=changeset) do
     Eraser.new(changeset.changes.text, changeset.changes.steps)
   end
